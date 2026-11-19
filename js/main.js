@@ -1,11 +1,11 @@
 /**
  * L'Osteria di Canterbury — Piazza Leonardo, 18, 80129 Napoli (NA)
- * Script Dinamico Interattivo:
- * 1. Tilt 3D fluido su card e piatti al movimento del mouse
- * 2. Menu mobile responsive scattante
- * 3. Galleria dinamica filtrabile (Locale, Piatti, Dettagli) con aggiornamento contatori & Lightbox
- * 4. Toast discreto recensioni verificate con rotazione, pausa al passaggio del mouse e limite di sessione
- * 5. Cookie consent manager collegato al caricamento interattivo di Google Maps
+ * Script Dinamico Mobile-First:
+ * 1. Tilt 3D fluido su desktop (dispositivi con mouse)
+ * 2. Menu mobile responsive con chiusura su click link o tasto Esc
+ * 3. Galleria dinamica filtrabile con contatori aggiornati e Lightbox accessibile
+ * 4. Mini Cookie Banner ultra-compatto in basso + pannello "Più informazioni" espandibile a richiesta
+ * 5. Toast discreto recensioni verificate con pausa su hover e limite di sessione
  */
 
 (function () {
@@ -31,11 +31,13 @@
   }
 
   /* ==========================================================================
-     1. EFFETTO DINAMICO TILT 3D SULLE CARD AL MOVIMENTO DEL MOUSE
+     1. EFFETTO DINAMICO TILT 3D SULLE CARD (SOLO DESKTOP CON MOUSE)
      ========================================================================== */
   function initDynamicTiltEffect() {
-    // Abilita l'effetto su dispositivi non-touch con mouse
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !window.matchMedia('(hover: hover)').matches) {
+    if (
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      !window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    ) {
       return;
     }
 
@@ -49,10 +51,15 @@
         var centerX = rect.width / 2;
         var centerY = rect.height / 2;
 
-        var rotateX = ((y - centerY) / centerY) * -6; // max 6 deg
-        var rotateY = ((x - centerX) / centerX) * 6;
+        var rotateX = ((y - centerY) / centerY) * -5;
+        var rotateY = ((x - centerX) / centerX) * 5;
 
-        card.style.transform = 'perspective(1000px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateY(-8px)';
+        card.style.transform =
+          'perspective(1000px) rotateX(' +
+          rotateX.toFixed(2) +
+          'deg) rotateY(' +
+          rotateY.toFixed(2) +
+          'deg) translateY(-6px)';
       });
 
       card.addEventListener('mouseleave', function () {
@@ -96,7 +103,7 @@
   }
 
   /* ==========================================================================
-     3. GALLERIA DINAMICA CON FILTRI & LIGHTBOX AD ALTA RISOLUZIONE
+     3. GALLERIA DINAMICA CON FILTRI & LIGHTBOX
      ========================================================================== */
   function initGalleryAndLightbox() {
     var filterButtons = Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));
@@ -177,7 +184,7 @@
       lightboxImg.setAttribute('src', src);
       lightboxImg.setAttribute('alt', title);
       lightboxCat.textContent = categoryLabel;
-      lightboxCounter.textContent = (currentIndex + 1) + ' / ' + activeTriggers.length;
+      lightboxCounter.textContent = currentIndex + 1 + ' / ' + activeTriggers.length;
       lightboxTitle.textContent = title;
       lightboxDesc.textContent = caption;
     }
@@ -243,7 +250,7 @@
   }
 
   /* ==========================================================================
-     4. CONSENSO COOKIE & INTEGRAZIONE GOOGLE MAPS
+     4. MINI BANNER COOKIE COMPATTO & INTEGRAZIONE GOOGLE MAPS
      ========================================================================== */
   function initCookieConsentAndMap() {
     var STORAGE_KEY = 'osteria_canterbury_cookie_consent_v2';
@@ -253,6 +260,7 @@
     var acceptAllBtn = document.getElementById('cookieAcceptAllBtn');
     var rejectBtn = document.getElementById('cookieRejectBtn');
     var customizeBtn = document.getElementById('cookieCustomizeBtn');
+    var closeDetailsBtn = document.getElementById('cookieCloseDetailsBtn');
     var saveCustomBtn = document.getElementById('cookieSaveCustomBtn');
     var openFooterBtn = document.getElementById('openCookieSettingsFooter');
     var enableMapConsentBtn = document.getElementById('enableMapConsentBtn');
@@ -283,7 +291,7 @@
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
       } catch (err) {
-        // Ignora
+        // Ignora errori storage
       }
 
       applyConsentPreferences(payload);
@@ -304,7 +312,10 @@
           if (!existingIframe) {
             var iframe = document.createElement('iframe');
             iframe.setAttribute('src', mapContainer.getAttribute('data-map-src') || '');
-            iframe.setAttribute('title', "Mappa Google Maps - L'Osteria di Canterbury, Piazza Leonardo, 18, 80129 Napoli");
+            iframe.setAttribute(
+              'title',
+              "Mappa Google Maps - L'Osteria di Canterbury, Piazza Leonardo, 18, 80129 Napoli"
+            );
             iframe.setAttribute('loading', 'lazy');
             iframe.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
             iframe.setAttribute('allowfullscreen', '');
@@ -322,6 +333,7 @@
     function showCookieBanner(openCustomizeDirectly) {
       if (!cookieBanner) return;
       cookieBanner.hidden = false;
+      document.body.classList.add('cookie-bar-active');
 
       if (openCustomizeDirectly && customizePanel && customizeBtn) {
         customizePanel.hidden = false;
@@ -332,6 +344,7 @@
     function hideCookieBanner() {
       if (!cookieBanner) return;
       cookieBanner.hidden = true;
+      document.body.classList.remove('cookie-bar-active');
       if (customizePanel && customizeBtn) {
         customizePanel.hidden = true;
         customizeBtn.setAttribute('aria-expanded', 'false');
@@ -355,6 +368,13 @@
         var isHidden = customizePanel.hidden;
         customizePanel.hidden = !isHidden;
         customizeBtn.setAttribute('aria-expanded', String(isHidden));
+      });
+    }
+
+    if (closeDetailsBtn && customizePanel && customizeBtn) {
+      closeDetailsBtn.addEventListener('click', function () {
+        customizePanel.hidden = true;
+        customizeBtn.setAttribute('aria-expanded', 'false');
       });
     }
 
@@ -411,15 +431,18 @@
 
     var verifiedExcerpts = [
       {
-        quote: '“La Genovese napoletana con cipolle cotte piano e la parmigiana di melanzane sono esattamente come a casa di nonna.”',
+        quote:
+          '“La Genovese napoletana con cipolle cotte piano e la parmigiana di melanzane sono esattamente come a casa di nonna.”',
         meta: 'Valutazione 4,6/5 su 213 recensioni verificate'
       },
       {
-        quote: '“Atmosfera raccolta e conduzione familiare genuina: conto onesto nella fascia 20–30 € per una cena splendida a Napoli.”',
+        quote:
+          '“Atmosfera raccolta e conduzione familiare genuina: conto onesto nella fascia 20–30 € per una cena splendida a Napoli.”',
         meta: 'Sintesi verificata • Scheda locale Piazza Leonardo'
       },
       {
-        quote: '“Locale intimo e curato con posti limitati e piatti del giorno freschi: consigliamo vivamente la prenotazione via WhatsApp.”',
+        quote:
+          '“Locale intimo e curato con posti limitati e piatti del giorno freschi: consigliamo vivamente la prenotazione via WhatsApp.”',
         meta: 'Nota pratica verificata • Scheda Google'
       }
     ];
@@ -427,7 +450,7 @@
     var SESSION_COUNT_KEY = 'osteria_canterbury_toast_count_v2';
     var SESSION_DISMISSED_KEY = 'osteria_canterbury_toast_dismissed_v2';
     var MAX_SHOWS_PER_SESSION = 3;
-    var INITIAL_DELAY_MS = 8000;
+    var INITIAL_DELAY_MS = 10000;
     var DISPLAY_DURATION_MS = 7500;
     var INTERVAL_BETWEEN_MS = 18000;
 
