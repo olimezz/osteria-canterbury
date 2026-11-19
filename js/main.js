@@ -431,19 +431,16 @@
 
     var verifiedExcerpts = [
       {
-        quote:
-          '“La Genovese napoletana con cipolle cotte piano e la parmigiana di melanzane sono esattamente come a casa di nonna.”',
-        meta: 'Valutazione 4,6/5 su 213 recensioni verificate'
+        quote: '“Genovese e parmigiana eccezionali, proprio come a casa!”',
+        meta: '4,6/5 su 213 recensioni verificate'
       },
       {
-        quote:
-          '“Atmosfera raccolta e conduzione familiare genuina: conto onesto nella fascia 20–30 € per una cena splendida a Napoli.”',
-        meta: 'Sintesi verificata • Scheda locale Piazza Leonardo'
+        quote: '“Accoglienza familiare e conto onesto (20–30 € a persona).”',
+        meta: 'Recensioni verificate • Napoli'
       },
       {
-        quote:
-          '“Locale intimo e curato con posti limitati e piatti del giorno freschi: consigliamo vivamente la prenotazione via WhatsApp.”',
-        meta: 'Nota pratica verificata • Scheda Google'
+        quote: '“Sala intima con pochi tavoli: prenota prima su WhatsApp!”',
+        meta: 'Consiglio verificato • Piazza Leonardo'
       }
     ];
 
